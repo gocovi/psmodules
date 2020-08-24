@@ -82,6 +82,11 @@ function Confirm-AutomateLatestVersion() {
     else {
         $LatestVersion = (Get-AutomateLatestVersion)
 
+        if (!$LatestVersion) {
+            Write-Error "Unable to get the latest version from Automate."
+            exit
+        }
+
         if ((Get-LTServiceInfo).Version -eq $LatestVersion) {
             Write-Output "This Automate agent is running the latest version."
         }
