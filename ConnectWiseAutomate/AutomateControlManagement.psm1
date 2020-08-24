@@ -58,15 +58,14 @@ function Write-CoviLog($Status, $Message) {
 
 # Uses LTPosh to compare the server version to the version on the agent.
 function Confirm-AutomateLatestVersion() {
+    
     [CmdletBinding()]
     param (
         [Parameter()]
-        [string]
-        $CoviApiKey,
+        [string]$CoviApiKey,
 
-        [Parameter]
-        [switch]
-        $Update
+        [Parameter()]
+        [switch]$Update
     )
 
     if ($CoviApiKey) {
@@ -80,7 +79,7 @@ function Confirm-AutomateLatestVersion() {
     else {
         Write-Host "Importing Labtech Powershell Module..."
         (new-object Net.WebClient).DownloadString('https://raw.githubusercontent.com/LabtechConsulting/LabTech-Powershell-Module/master/LabTech.psm1') | Invoke-Expression
-        
+
         $LatestVersion = (Get-AutomateLatestVersion)
 
         if (!$LatestVersion) {
