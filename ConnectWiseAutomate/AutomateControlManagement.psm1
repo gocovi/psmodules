@@ -116,4 +116,8 @@ $PublicFunctions = @(
     "Confirm-AutomateLatestVersion"
 )
 
-Export-ModuleMember -Function $PublicFunctions
+# Taken from LTPosh: https://github.com/LabtechConsulting/LabTech-Powershell-Module/blob/master/LabTech.psm1
+If (($MyInvocation.Line -match 'Import-Module' -or $MyInvocation.MyCommand -match 'Import-Module') -and -not ($MyInvocation.Line -match $ModuleGuid -or $MyInvocation.MyCommand -match $ModuleGuid)) {
+    # Only export module members when being loaded as a module
+    Export-ModuleMember -Function $PublicFunctions
+}
