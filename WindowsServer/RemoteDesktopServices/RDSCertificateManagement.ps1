@@ -1,14 +1,23 @@
 <#  
 .SYNOPSIS  
     Pulls the most recent certificate from IIS for a specified domain and sets it for all RDS services.
-.DESCRIPTION  
+.DESCRIPTION 
+    1. Install your certificate in IIS.
+    2. Import the module:
+    
+        (new-object Net.WebClient).DownloadString('https://raw.githubusercontent.com/gocovi/psmodules/master/WindowsServer/RemoteDesktopServices/RDSCertificateManagement.ps1') | iex
 
+    3. Run 'Set-RDCertificatesFromIIS -Domain remote.yourdomain.com
+
+    
 .NOTES  
-    File Name  : Set-RDCertificatesFromIIS.ps1
+    File Name  : RDSCertificateManagement.ps1
     Author     : jack@gocovi.com
     Requires   : 
 
 .LINK 
+
+
 #>
 
 function Set-RDCertificatesFromIIS {
