@@ -73,13 +73,14 @@ function Confirm-AutomateLatestVersion() {
         $script:CoviApiKey = $CoviApiKey
     }
 
-    Write-Host "Importing Labtech Powershell Module..."
-    (new-object Net.WebClient).DownloadString('https://raw.githubusercontent.com/LabtechConsulting/LabTech-Powershell-Module/master/LabTech.psm1') | Invoke-Expression
-
-    if (!(Get-Service LTService)) {
+    $LTService = Get-Service | Where-Object Name -eq LTService
+    if (!$LTService) {
         Write-Output "LTService is not installed."
     }
     else {
+        Write-Host "Importing Labtech Powershell Module..."
+        (new-object Net.WebClient).DownloadString('https://raw.githubusercontent.com/LabtechConsulting/LabTech-Powershell-Module/master/LabTech.psm1') | Invoke-Expression
+        
         $LatestVersion = (Get-AutomateLatestVersion)
 
         if (!$LatestVersion) {
