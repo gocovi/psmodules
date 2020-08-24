@@ -58,14 +58,10 @@ function Write-CoviLog($Status, $Message) {
 
 # Uses LTPosh to compare the server version to the version on the agent.
 function Confirm-AutomateLatestVersion() {
-    
-    [CmdletBinding()]
     param (
-        [Parameter()]
         [string]$CoviApiKey,
 
-        [Parameter()]
-        [switch]$Update
+        [Switch]$Update
     )
 
     if ($CoviApiKey) {
