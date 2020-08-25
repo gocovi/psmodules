@@ -15,7 +15,7 @@ $CoviApiKey = $null
 
 function Get-AutomateLatestVersion() {
     $LTServiceInfo = Get-LTServiceInfo
-    $Server = $LTServiceInfo.'Server Address'.Split("|")[0]
+    $Server = $LTServiceInfo.Server[0]
     $Response = Invoke-RestMethod -Uri "$Server/LabTech/Agent.aspx"
     return $Response.Replace("||||||", "")
 }
@@ -66,7 +66,9 @@ function Confirm-AutomateLatestVersion() {
 
         [Switch]$Force,
 
-        [Switch]$Verbose
+        [Switch]$Verbose,
+
+        [string]$Server
     )
 
     if ($CoviApiKey) {
@@ -91,7 +93,17 @@ function Confirm-AutomateLatestVersion() {
                 exit
             }
 
-            if ((Get-LTServiceInfo).Version -eq $LatestVersion) {
+            $LTServiceInfo = Get-LTServiceInfo
+
+            if ($Server) {
+                if ($LTServiceInfo.Server -notcontains $Server) {
+                    Write-Output "Mismatched server found: $($LTServiceInfo.Server)"
+                    Write-CoviLog -Status "Error" -Message "Mismatched server found: $($LTServiceInfo.Server)"
+                    exit
+                }
+            }
+
+            if ($LTServiceInfo.Version -eq $LatestVersion) {
                 Write-Output "This Automate agent is running the latest version."
 
                 # Mostly used to confirm logging works
