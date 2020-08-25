@@ -15,7 +15,7 @@ $CoviApiKey = $null
 
 function Get-AutomateLatestVersion() {
     $LTServiceInfo = Get-LTServiceInfo
-    $Server = $LTServiceInfo.Server[0]
+    $Server = $LTServiceInfo.'Server Address'.Split("|")[0]
     $Response = Invoke-RestMethod -Uri "$Server/LabTech/Agent.aspx"
     return $Response.Replace("||||||", "")
 }
@@ -96,7 +96,7 @@ function Confirm-AutomateLatestVersion() {
             $LTServiceInfo = Get-LTServiceInfo
 
             if ($Server) {
-                if ($LTServiceInfo.Server -notcontains $Server) {
+                if ($LTServiceInfo.'Server Address' -notlike "*$Server*") {
                     Write-Output "Mismatched server found: $($LTServiceInfo.Server)"
                     Write-CoviLog -Status "Error" -Message "Mismatched server found: $($LTServiceInfo.Server)"
                     exit
