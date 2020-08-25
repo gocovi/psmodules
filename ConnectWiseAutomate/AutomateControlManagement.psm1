@@ -61,56 +61,65 @@ function Confirm-AutomateLatestVersion() {
     param (
         [string]$CoviApiKey,
 
-        [Switch]$Update
+        [Switch]$Update,
+
+        [Switch]$Force
     )
 
     if ($CoviApiKey) {
         $script:CoviApiKey = $CoviApiKey
     }
 
-    $LTService = Get-Service | Where-Object { $_.Name -eq "LTService" }
+    try {
+        $LTService = Get-Service | Where-Object { $_.Name -eq "LTService" }
 
-    if (!$LTService) {
-        Write-Output "LTService is not installed."
-    }
-    else {
-        Write-Host "Importing Labtech Powershell Module..."
-        (new-object Net.WebClient).DownloadString('https://raw.githubusercontent.com/LabtechConsulting/LabTech-Powershell-Module/master/LabTech.psm1') | Invoke-Expression
-
-        $LatestVersion = (Get-AutomateLatestVersion)
-
-        if (!$LatestVersion) {
-            Write-Error "Unable to get the latest version from Automate."
-            exit
-        }
-
-        if ((Get-LTServiceInfo).Version -eq $LatestVersion) {
-            Write-Output "This Automate agent is running the latest version."
+        if (!$LTService) {
+            Write-Output "LTService is not installed."
         }
         else {
-            Write-Output "Current Version: $((Get-LTServiceInfo).Version)`nLatest Version: $LatestVersion"
+            Write-Host "Importing Labtech Powershell Module..."
+            (new-object Net.WebClient).DownloadString('https://raw.githubusercontent.com/LabtechConsulting/LabTech-Powershell-Module/master/LabTech.psm1') | Invoke-Expression
 
-            Write-CoviLog -Status "Warning" -Message "An update is available for this agent."
+            $LatestVersion = (Get-AutomateLatestVersion)
 
-            if ($Update) {
-                Update-LTService -Confirm:$False
+            if (!$LatestVersion) {
+                Write-Error "Unable to get the latest version from Automate."
+                exit
+            }
 
-                # Rechecking to make sure the agent got updated.
-                if ((Get-LTServiceInfo).Version -ne $LatestVersion) {
-                    Redo-LTService -Confirm:$False
-                }
+            if ((Get-LTServiceInfo).Version -eq $LatestVersion) {
+                Write-Output "This Automate agent is running the latest version."
+            }
+            else {
+                Write-Output "Current Version: $((Get-LTServiceInfo).Version)`nLatest Version: $LatestVersion"
 
-                # Checking again after a full reinstall
-                if ((Get-LTServiceInfo).Version -ne $LatestVersion) {
-                    Write-Output "Agent failed to update to the latest version by both updating and reinstalling."
-                    Write-CoviLog -Status "Failed"
-                }
-                else {
-                    Write-Output "Agent updated successfully."
-                    Write-CoviLog -Status "Success"
+                Write-CoviLog -Status "Information" -Message "An update is available for this agent."
+
+                # Flag to do the actual update.
+                if ($Update) {
+                    Update-LTService -Confirm:$False
+
+                    # Rechecking to make sure the agent got updated.
+                    if ((Get-LTServiceInfo).Version -ne $LatestVersion -and $Force) {
+                        Redo-LTService -Confirm:$False
+                    }
+
+                    # Checking again after a full reinstall
+                    if ((Get-LTServiceInfo).Version -ne $LatestVersion) {
+                        Write-Output "Agent failed to update to the latest version."
+                        Write-CoviLog -Status "Failed"
+                    }
+                    else {
+                        Write-Output "Agent updated successfully."
+                        Write-CoviLog -Status "Success"
+                    }
                 }
             }
         }
+    }
+    catch {
+        Write-Output "Unknown Error: $($_.Exception.Message)"
+        Write-CoviLog -Status "Failed" -Message "Unknown Error: $($_.Exception.Message)"
     }
 }
 
