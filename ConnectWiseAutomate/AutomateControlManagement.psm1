@@ -119,6 +119,7 @@ function Confirm-AutomateLatestVersion() {
                 # Flag to do the actual update.
                 if ($Update) {
                     Update-LTService -Confirm:$False
+                    Start-Sleep -Seconds 20
 
                     # Rechecking to make sure the agent got updated.
                     if ((Get-LTServiceInfo).Version -ne $LatestVersion -and $Force) {
