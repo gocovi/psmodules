@@ -20,6 +20,24 @@ function Get-AutomateLatestVersion() {
     return $Response.Replace("||||||", "")
 }
 
+function Start-UpdateCheckLoop($LatestVersion) {
+    $Count = 0
+    $Success = $false
+
+    do {
+        if ((Get-LTServiceInfo).Version -ne $LatestVersion) {
+            Start-Sleep -Seconds 5
+        }
+        else {
+            $Success = $true
+        }
+
+        $Count++
+    } until ($Count -eq 3 -or $Success)
+
+    return $Success
+}
+
 function Write-CoviLog($Status, $Message) {
     if ($script:CoviApiKey) {
         $LTServiceInfo = Get-LTServiceInfo
@@ -119,15 +137,18 @@ function Confirm-AutomateLatestVersion() {
                 # Flag to do the actual update.
                 if ($Update) {
                     Update-LTService -Confirm:$False
-                    Start-Sleep -Seconds 20
+
+                    $Success = Start-UpdateCheckLoop -LatestVersion $LatestVersion
 
                     # Rechecking to make sure the agent got updated.
-                    if ((Get-LTServiceInfo).Version -ne $LatestVersion -and $Force) {
+                    if (!$Success -and $Force) {
                         Redo-LTService -Confirm:$False
                     }
 
+                    $Success = Start-UpdateCheckLoop -LatestVersion $LatestVersion
+
                     # Checking again after a full reinstall
-                    if ((Get-LTServiceInfo).Version -ne $LatestVersion) {
+                    if (!$Success) {
                         Write-Output "Agent failed to update to the latest version."
                         Write-CoviLog -Status "Failed"
                     }
