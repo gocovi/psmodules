@@ -103,6 +103,13 @@ function Confirm-AutomateLatestVersion() {
             # Making sure service is running
             if ($LTService.Status -ne "Running") {
                 try {
+                    # Killing the process if it's hung
+                    $LTProcessID = Get-WmiObject -Class Win32_Service -Filter "Name LIKE 'LTService'" | Select-Object -ExpandProperty ProcessId
+                    
+                    if ($LTProcessID) {
+                        taskkill /f /pid $LTProcessID
+                    }
+
                     $LTService | Start-Service -Confirm:$False
                 }
                 catch {
