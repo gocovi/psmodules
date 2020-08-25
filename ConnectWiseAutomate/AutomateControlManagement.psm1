@@ -46,10 +46,9 @@ function Write-CoviLog($Status, $Message) {
             "status"              = "$Status";
             "company"             = "Unknown"
         } | ConvertTo-Json
-
-
+        
         Invoke-WebRequest `
-            -Uri "https://api.gocovi.com/standard/covi/logs" `
+            -Uri "https://logconnector.gocovi.com" `
             -Headers @{ "x-api-key" = $script:CoviApiKey } `
             -UseBasicParsing `
             -Method Post `
