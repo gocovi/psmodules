@@ -100,6 +100,17 @@ function Confirm-AutomateLatestVersion() {
             Write-Output "LTService is not installed."
         }
         else {
+            # Making sure service is running
+            if ($LTService.Status -ne "Running") {
+                try {
+                    $LTService | Start-Service -Confirm:$False
+                }
+                catch {
+                    Write-Output "LTService couldn't be started. We will try the update anyways, but this device could have an issue."
+                    Write-CoviLog -Status "Error" -Message "LTService couldn't be started. We will try the update anyways, but this device could have an issue."
+                }
+            }
+
             Write-Host "Importing Labtech Powershell Module..."
 
             (new-object Net.WebClient).DownloadString('https://raw.githubusercontent.com/LabtechConsulting/LabTech-Powershell-Module/master/LabTech.psm1') | Invoke-Expression
