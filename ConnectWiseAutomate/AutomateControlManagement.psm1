@@ -68,7 +68,8 @@ function Confirm-AutomateLatestVersion() {
         $script:CoviApiKey = $CoviApiKey
     }
 
-    $LTService = Get-Service | Where-Object Name -eq LTService
+    $LTService = Get-Service | Where-Object { $_.Name -eq "LTService" }
+
     if (!$LTService) {
         Write-Output "LTService is not installed."
     }
