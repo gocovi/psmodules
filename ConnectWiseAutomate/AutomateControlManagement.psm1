@@ -63,7 +63,9 @@ function Confirm-AutomateLatestVersion() {
 
         [Switch]$Update,
 
-        [Switch]$Force
+        [Switch]$Force,
+
+        [Switch]$Verbose
     )
 
     if ($CoviApiKey) {
@@ -78,6 +80,7 @@ function Confirm-AutomateLatestVersion() {
         }
         else {
             Write-Host "Importing Labtech Powershell Module..."
+
             (new-object Net.WebClient).DownloadString('https://raw.githubusercontent.com/LabtechConsulting/LabTech-Powershell-Module/master/LabTech.psm1') | Invoke-Expression
 
             $LatestVersion = (Get-AutomateLatestVersion)
@@ -89,6 +92,11 @@ function Confirm-AutomateLatestVersion() {
 
             if ((Get-LTServiceInfo).Version -eq $LatestVersion) {
                 Write-Output "This Automate agent is running the latest version."
+
+                # Mostly used to confirm logging works
+                if ($Verbose) {
+                    Write-CoviLog -Status "Verbose" -Message "This Automate agent is running the latest version."
+                }
             }
             else {
                 Write-Output "Current Version: $((Get-LTServiceInfo).Version)`nLatest Version: $LatestVersion"
