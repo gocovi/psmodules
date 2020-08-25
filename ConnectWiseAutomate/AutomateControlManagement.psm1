@@ -33,7 +33,7 @@ function Write-CoviLog($Status, $Message) {
             "service_name"        = "ConnectWise Automate";
             "service_description" = "Agent Version Check";
             "sent_from"           = "ConnectWise Control";
-            "short_message"       = "Current Version: $((Get-LTServiceInfo).Version)   Latest Version: $LatestVersion";
+            "short_message"       = "Checking for Automate updates via Control.";
             "long_message"        = $Message;
             "trigger_name"        = "Manually ran by Jack Musick";
             "company_id"          = "$($LTServiceInfo.ClientID)";
@@ -41,6 +41,8 @@ function Write-CoviLog($Status, $Message) {
             "computer_id"         = "$($LTServiceInfo.ID)";
             "location_name"       = "Unknown";
             "location_id"         = "$LocationID";
+            "current_version"     = $LTServiceInfo.Version;
+            "latest_version"      = $LatestVersion;
             "status"              = "$Status";
             "company"             = "Unknown"
         } | ConvertTo-Json
