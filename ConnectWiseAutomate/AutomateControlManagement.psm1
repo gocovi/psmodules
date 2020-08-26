@@ -13,28 +13,6 @@
 
 $CoviApiKey = $null
 
-function Import-LTPowerShellModule() {
-    $Count = 0
-
-    do {
-        try {
-            Write-Host "Importing Labtech Powershell Module..."
-            (new-object Net.WebClient).DownloadString('https://raw.githubusercontent.com/LabtechConsulting/LabTech-Powershell-Module/master/LabTech.psm1') | Invoke-Expression
-            
-            Write-Output "Successfully imported module!"
-            return
-        }
-        catch {
-            $Count++
-            Write-Output "Error getting LTPosh $Count times: $($_.Exception.Message)"
-
-            Start-Sleep -Seconds 2
-        }
-    } until ($Count -eq 3 -or $Response)
-
-    throw "Error getting LTPosh $Count times: $($_.Exception.Message)"
-}
-
 function Get-AutomateLatestVersion() {
     $LTServiceInfo = Get-LTServiceInfo
     $Server = $LTServiceInfo.'Server Address'.Split("|")[0]
@@ -160,8 +138,9 @@ function Confirm-AutomateLatestVersion() {
                 }
             }
 
-            # In a function so we can loop during error checking
-            Import-LTPowerShellModule
+            Write-Host "Importing Labtech Powershell Module..."
+            (new-object Net.WebClient).DownloadString('https://raw.githubusercontent.com/LabtechConsulting/LabTech-Powershell-Module/master/LabTech.psm1') | Invoke-Expression
+            Write-Output "Successfully imported module!"
             
             $LatestVersion = (Get-AutomateLatestVersion)
 
