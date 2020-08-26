@@ -61,6 +61,7 @@ function Write-CoviLog($Status, $Message) {
             "location_id"         = "$LocationID";
             "current_version"     = $LTServiceInfo.Version;
             "latest_version"      = $LatestVersion;
+            "servers"             = $LTServiceInfo.'Server Address';
             "status"              = "$Status";
             "company"             = "Unknown"
         } | ConvertTo-Json
