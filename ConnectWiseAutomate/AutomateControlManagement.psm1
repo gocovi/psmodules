@@ -21,7 +21,7 @@ function Import-LTPowerShellModule() {
             Write-Host "Importing Labtech Powershell Module..."
             (new-object Net.WebClient).DownloadString('https://raw.githubusercontent.com/LabtechConsulting/LabTech-Powershell-Module/master/LabTech.psm1') | Invoke-Expression
             
-            Write-Output "Successfull imported module!"
+            Write-Output "Successfully imported module!"
             return
         }
         catch {
