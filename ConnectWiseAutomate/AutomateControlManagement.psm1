@@ -16,8 +16,23 @@ $CoviApiKey = $null
 function Get-AutomateLatestVersion() {
     $LTServiceInfo = Get-LTServiceInfo
     $Server = $LTServiceInfo.'Server Address'.Split("|")[0]
-    $Response = Invoke-RestMethod -Uri "$Server/LabTech/Agent.aspx"
-    return $Response.Replace("||||||", "")
+
+    $Count = 0
+
+    do {
+        try {
+            $Response = Invoke-RestMethod -Uri "$Server/LabTech/Agent.aspx"
+            return $Response.Replace("||||||", "")
+        }
+        catch {
+            $Count++
+            Write-Output "Error getting latest version $Count times: $($_.Exception.Message)"
+
+            Start-Sleep -Seconds 2
+        }
+    } until ($Count -eq 3 -or $Response)
+
+    throw "Error getting latest version $Count times: $($_.Exception.Message)"
 }
 
 function Start-UpdateCheckLoop($LatestVersion) {
@@ -124,9 +139,9 @@ function Confirm-AutomateLatestVersion() {
             }
 
             Write-Host "Importing Labtech Powershell Module..."
-
             (new-object Net.WebClient).DownloadString('https://raw.githubusercontent.com/LabtechConsulting/LabTech-Powershell-Module/master/LabTech.psm1') | Invoke-Expression
-
+            Write-Output "Successfull imported module!"
+            
             $LatestVersion = (Get-AutomateLatestVersion)
 
             if (!$LatestVersion) {
