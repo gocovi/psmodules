@@ -27,7 +27,7 @@ function Start-UpdateCheckLoop($LatestVersion) {
 
     do {
         if ((Get-LTServiceInfo).Version -ne $LatestVersion) {
-            Start-Sleep -Seconds 5
+            Start-Sleep -Seconds 10
         }
         else {
             $Success = $true
