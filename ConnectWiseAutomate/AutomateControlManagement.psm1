@@ -23,6 +23,7 @@ function Get-AutomateLatestVersion() {
 function Start-UpdateCheckLoop($LatestVersion) {
     $Count = 0
     $Success = $false
+    $ResultMessage = "Failed"
 
     do {
         if ((Get-LTServiceInfo).Version -ne $LatestVersion) {
@@ -30,10 +31,13 @@ function Start-UpdateCheckLoop($LatestVersion) {
         }
         else {
             $Success = $true
+            $ResultMessage = "Success"
         }
 
         $Count++
     } until ($Count -eq 3 -or $Success)
+
+    Write-Output "Update status is '$ResultMessage' after checking $Count time(s)."
 
     return $Success
 }
@@ -162,14 +166,14 @@ function Confirm-AutomateLatestVersion() {
                     # Rechecking to make sure the agent got updated.
                     if (!$Success -and $Force) {
                         Redo-LTService -Confirm:$False
-                    }
 
-                    $Success = Start-UpdateCheckLoop -LatestVersion $LatestVersion
+                        $Success = Start-UpdateCheckLoop -LatestVersion $LatestVersion
+                    }
 
                     # Checking again after a full reinstall
                     if (!$Success) {
                         Write-Output "Agent failed to update to the latest version."
-                        Write-CoviLog -Status "Failed"
+                        Write-CoviLog -Status "Failed" -Message "Agent failed to update to the latest version."
                     }
                     else {
                         Write-Output "Agent updated successfully."
