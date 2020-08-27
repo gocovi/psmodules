@@ -38,7 +38,6 @@ function Get-AutomateLatestVersion() {
 function Start-UpdateCheckLoop($LatestVersion) {
     $Count = 0
     $Success = $false
-    $ResultMessage = "Failed"
 
     do {
         if ((Get-LTServiceInfo).Version -ne $LatestVersion) {
@@ -46,13 +45,10 @@ function Start-UpdateCheckLoop($LatestVersion) {
         }
         else {
             $Success = $true
-            $ResultMessage = "Success"
         }
 
         $Count++
     } until ($Count -eq 3 -or $Success)
-
-    Write-Output "Update status is '$ResultMessage' after checking $Count time(s)."
 
     return $Success
 }
