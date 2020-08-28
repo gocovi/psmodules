@@ -26,9 +26,9 @@ function Get-AutomateLatestVersion() {
         }
         catch {
             $Count++
-            Start-Sleep -Seconds 2
+            Start-Sleep -Seconds 1
         }
-    } until ($Count -eq 3 -or $Response)
+    } until ($Count -eq 10 -or $Response)
 
     throw "Error getting latest version $Count times: $($_.Exception.Message)"
 }
