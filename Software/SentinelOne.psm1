@@ -12,6 +12,41 @@
 .LINK 
 #>
 
+function Remove-Webroot() {
+    $WebrootService = Get-Service | Where-Object Name -eq "WRSVC" | Select-Object -Property Name, Status, StartType
+
+    if ($WebrootService.Status -eq "Stopped" -and $WebrootService.StartType -eq "Disabled") {
+        Write-Output "Webroot is disabled so we can continue the install."
+    }
+    else {
+        Start-BitsTransfer `
+            -Source "http://anywhere.webrootcloudav.com/zerol/wsasme.msi" `
+            -Destination "C:\Covi\Webroot.msi"
+    
+        msiexec /uninstall "C:\Covi\Webroot.msi" /qn
+
+        if (Get-Service | Where-Object Name -eq "WRSVC") {
+            throw "Webroot is still installed. Please manually remove it and try, again."
+        }
+
+        Write-Output "Webroot was successfully removed!"
+    }
+}
+
+function Remove-Cylance() {
+    Start-Process  `
+        -FilePath "msiexec.exe" `
+        -ArgumentList "/x {2E64FC5C-9286-4A31-916B-0D8AE4B22954} /qn MSIRESTARTMANAGERCONTROL=Disable" `
+        -Wait `
+        -NoNewWindow
+
+    if (Get-Service | Where-Object Name -eq "CylanceSvc") {
+        throw "CylanceSvc is still installed. Please manually remove it and try, again."
+    }
+
+    Write-Output "Cylance was successfully removed!"
+}
+
 function Install-SentinelOne() {
     param (
         [Parameter(Mandatory = $true)]
@@ -27,48 +62,6 @@ function Install-SentinelOne() {
     $Date = Get-Date -Format "MM-yyyy"
     $DestinationFile = Join-Path $DestinationPath -ChildPath "SentinelOneAgent_Windows-$Date.exe"
     New-Item -ItemType Directory -Force -Path $DestinationPath
-
-    <#
-    Functions
-#>
-    function Remove-Webroot() {
-        $WebrootService = Get-Service | Where-Object Name -eq "WRSVC" | Select-Object -Property Name, Status, StartType
-
-        if ($WebrootService.Status -eq "Stopped" -and $WebrootService.StartType -eq "Disabled") {
-            Write-Output "Webroot is disabled so we can continue the install."
-        }
-        else {
-            Start-BitsTransfer `
-                -Source "http://anywhere.webrootcloudav.com/zerol/wsasme.msi" `
-                -Destination "C:\Covi\Webroot.msi"
-    
-            msiexec /uninstall "C:\Covi\Webroot.msi" /qn
-
-            if (Get-Service | Where-Object Name -eq "WRSVC") {
-                throw "Webroot is still installed. Please manually remove it and try, again."
-            }
-
-            Write-Output "Webroot was successfully removed!"
-        }
-    }
-
-    function Remove-Cylance() {
-        Start-Process  `
-            -FilePath "msiexec.exe" `
-            -ArgumentList "/x {2E64FC5C-9286-4A31-916B-0D8AE4B22954} /qn MSIRESTARTMANAGERCONTROL=Disable" `
-            -Wait `
-            -NoNewWindow
-
-        if (Get-Service | Where-Object Name -eq "CylanceSvc") {
-            throw "CylanceSvc is still installed. Please manually remove it and try, again."
-        }
-
-        Write-Output "Cylance was successfully removed!"
-    }
-
-    <#
-    Start
-#>
 
     # Making sure the computer is X64
     if (![Environment]::Is64BitOperatingSystem) {
@@ -118,6 +111,10 @@ function Install-SentinelOne() {
 
     Write-Output "SentinelOne installed successfully!"
 }
+
+$PublicFunctions = @(
+    "Install-SentinelOne"
+)
 
 # Taken from LTPosh: https://github.com/LabtechConsulting/LabTech-Powershell-Module/blob/master/LabTech.psm1
 If (($MyInvocation.Line -match 'Import-Module' -or $MyInvocation.MyCommand -match 'Import-Module') -and -not ($MyInvocation.Line -match $ModuleGuid -or $MyInvocation.MyCommand -match $ModuleGuid)) {
