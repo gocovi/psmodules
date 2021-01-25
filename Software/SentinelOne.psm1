@@ -40,7 +40,12 @@ function Remove-Cylance() {
         -Wait `
         -NoNewWindow
 
-    if (Get-Service | Where-Object Name -eq "CylanceSvc") {
+    $CylanceService = Get-Service | Where-Object Name -eq "CylanceSvc"
+
+    if ($CylanceService.Status -eq "Stopped") {
+        sc.exe delete CylanceSvc
+    }
+    else {
         throw "CylanceSvc is still installed. Please manually remove it and try, again."
     }
 
