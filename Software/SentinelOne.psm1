@@ -45,7 +45,7 @@ function Remove-Cylance() {
     if ($CylanceService.Status -eq "Stopped") {
         sc.exe delete CylanceSvc
     }
-    else {
+    elseif ($CylanceService) {
         throw "CylanceSvc is still installed. Please manually remove it and try, again."
     }
 
