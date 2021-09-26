@@ -1,7 +1,7 @@
 #!ps
 <#  
 .SYNOPSIS  
-    Downloads and installs SentinelOne.
+    Generate a random passphrase with Get-Passphrase
 .DESCRIPTION  
     
 .NOTES  
