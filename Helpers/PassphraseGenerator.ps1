@@ -7801,33 +7801,37 @@ function Get-Passphrase() {
     );
 
     $SpecialCharacters = "?", "!", "#", "$", "&"
-    $WordCount = [math]::Ceiling($CharacterCountMinimum / 4)
+
+    $WordList = @()
+    $CharacterCountMinimumModifer = 1
 
     do {
-        $WordList = @()
-
-        1..$WordCount | ForEach-Object { $WordList += $EEFLongWordList | Get-Random }
-
-        $HalfOfWordCount = [math]::Floor($WordCount / 2)
-
-        # Randomly capitalize about half of the words
-        1..$HalfOfWordCount | ForEach-Object {
-            $RandomIndex = 0..$($WordCount - 1) | Get-Random
-            $WordList[$RandomIndex] = $WordList[$RandomIndex].ToUpper()
-        }
+        $TextInfo = (Get-Culture).TextInfo
+        $RandomWord = $TextInfo.ToTitleCase(($EEFLongWordList | Get-Random))
 
         # Randomly end in a special character
-        1..$HalfOfWordCount | ForEach-Object {
-            $RandomIndex = 0..$($WordCount - 1) | Get-Random
+        $UseSpecialCharacter = Get-Random -InputObject ([bool]$True, [bool]$False)
+
+        if ($UseSpecialCharacter) {
+            # Less characters are needed the more special characters we use.
+            $CharacterCountMinimumModifer++
+
             $RandomSpecialCharacter = $SpecialCharacters | Get-Random
-            $WordList[$RandomIndex] = $WordList[$RandomIndex] + $RandomSpecialCharacter
-        }     
+            $RandomWord = $RandomWord + $RandomSpecialCharacter
+        } 
 
-        $RandomNumber = 1..9 | Get-Random
-        $WordList += [string]$RandomNumber 
+        $WordList += $RandomWord
+    } until (($WordList -Join $Separator).Length -ge ($CharacterCountMinimum - $CharacterCountMinimumModifer))
 
-        $Passphrase = $WordList -Join $Separator
-    } until ($Passphrase.Length -ge $CharacterCountMinimum)
+    $Passphrase = $WordList -Join $Separator
+    
+    if ($CharacterCountMinimumModifer -eq 1) {
+        $RandomSpecialCharacter = $SpecialCharacters | Get-Random
+        $Passphrase = $Passphrase + $RandomSpecialCharacter
+    }
+
+    $RandomNumber = 1..9 | Get-Random
+    $Passphrase = $Passphrase + [string]$RandomNumber
 
     return $Passphrase
 }
