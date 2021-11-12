@@ -7803,7 +7803,8 @@ function Get-Passphrase() {
     $SpecialCharacters = "?", "!", "#", "$", "&"
 
     $WordList = @()
-    $CharacterCountMinimumModifer = 1
+
+    $Passphrase = ""
 
     do {
         $TextInfo = (Get-Culture).TextInfo
@@ -7813,17 +7814,13 @@ function Get-Passphrase() {
         $UseSpecialCharacter = Get-Random -InputObject ([bool]$True, [bool]$False)
 
         if ($UseSpecialCharacter) {
-            # Less characters are needed the more special characters we use.
-            $CharacterCountMinimumModifer++
-
             $RandomSpecialCharacter = $SpecialCharacters | Get-Random
             $RandomWord = $RandomWord + $RandomSpecialCharacter
         } 
 
         $WordList += $RandomWord
-    } until (($WordList -Join $Separator).Length -ge ($CharacterCountMinimum - $CharacterCountMinimumModifer))
-
-    $Passphrase = $WordList -Join $Separator
+        $Passphrase = $WordList -Join $Separator
+    } until ($Passphrase.Length -ge $CharacterCountMinimum)
     
     if ($CharacterCountMinimumModifer -eq 1) {
         $RandomSpecialCharacter = $SpecialCharacters | Get-Random
